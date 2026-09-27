@@ -1,9 +1,9 @@
 @echo off
-TITLE Storage Cleanup and Permanent Fixed Tunnel Launcher
+TITLE Storage Cleanup and Cloudflare Tunnel Launcher
 color 0A
 
 echo ================================================================
-echo    STORAGE CLEANUP ANALYZER - PERMANENT TUNNEL LAUNCHER
+echo    STORAGE CLEANUP ANALYZER - CLOUDFLARE TUNNEL LAUNCHER
 echo ================================================================
 echo.
 
@@ -46,12 +46,16 @@ exit /b
 
 :START_TUNNEL
 echo.
-echo [2/2] Launching Permanent Fixed Subdomain Tunnel...
-start "Permanent Fixed Tunnel" npx localtunnel --port 5000 --subdomain myhelper-abdul-sync
-
+echo [2/2] Launching Cloudflare Tunnel...
 where cloudflared >nul 2>nul
 if %errorlevel%==0 (
-    start "Cloudflare Tunnel Backup" cloudflared tunnel --url http://localhost:5000
+    echo [+] Cloudflare Tunnel binary detected. Launching tunnel...
+    start "Cloudflare Tunnel" cloudflared tunnel --url http://localhost:5000
+) else if exist "C:\Program Files (x86)\cloudflared\cloudflared.exe" (
+    echo [+] Cloudflare Tunnel found in Program Files. Launching tunnel...
+    start "Cloudflare Tunnel" "C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://localhost:5000
+) else (
+    echo [!] cloudflared not found. Please ensure Cloudflare Tunnel is installed.
 )
 
 :FINISH
@@ -61,10 +65,8 @@ echo    LAUNCH COMPLETE!
 echo ================================================================
 echo.
 echo  1. Local Web Dashboard:        http://localhost:5000
-echo  2. PERMANENT FIXED TUNNEL URL:  https://myhelper-abdul-sync.loca.lt
-echo.
-echo  NOTE: The Android App is PRE-CONFIGURED to sync automatically to
-echo  https://myhelper-abdul-sync.loca.lt without entering any URL!
+echo  2. Cloudflare Tunnel Window:   Copy the generated https://xxxx.trycloudflare.com URL
+echo                                 from the Cloudflare window into the app!
 echo.
 echo Press any key to exit launcher (Server and Tunnel remain running).
 pause >nul

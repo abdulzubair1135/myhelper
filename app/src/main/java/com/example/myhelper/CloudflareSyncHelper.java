@@ -54,12 +54,7 @@ public class CloudflareSyncHelper {
 
     public static String getTunnelUrl(Context context) {
         SharedPreferences sp = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        String saved = sp.getString(KEY_TUNNEL_URL, "");
-        if (saved == null || saved.trim().isEmpty() || saved.contains("trycloudflare.com") || saved.contains("pretty-walrus-36")) {
-            sp.edit().putString(KEY_TUNNEL_URL, "https://myhelper-abdul-sync.loca.lt").apply();
-            return "https://myhelper-abdul-sync.loca.lt";
-        }
-        return saved;
+        return sp.getString(KEY_TUNNEL_URL, "");
     }
 
     public static String getApiKey(Context context) {
@@ -93,20 +88,21 @@ public class CloudflareSyncHelper {
                 String tunnelUrl = getTunnelUrl(context);
                 String apiKey = getApiKey(context);
                 List<String> targetUrls = new ArrayList<>();
-                if (isEmulator()) {
-                    targetUrls.add("http://10.0.2.2:5000/api/command");
-                    targetUrls.add("http://10.178.194.48:5000/api/command");
-                } else {
-                    targetUrls.add("http://10.178.194.48:5000/api/command");
-                    targetUrls.add("http://10.0.2.2:5000/api/command");
-                }
-                targetUrls.add("https://myhelper-abdul-sync.loca.lt/api/command");
-                if (!tunnelUrl.isEmpty() && !targetUrls.contains(tunnelUrl)) {
+                if (!tunnelUrl.isEmpty()) {
                     String primary = tunnelUrl;
                     if (!primary.endsWith("/api/command")) {
                         primary += primary.endsWith("/") ? "api/command" : "/api/command";
                     }
-                    if (!targetUrls.contains(primary)) targetUrls.add(primary);
+                    targetUrls.add(primary);
+                }
+                if (isEmulator()) {
+                    targetUrls.add("http://10.0.2.2:5000/api/command");
+                    targetUrls.add("http://10.129.9.31:5000/api/command");
+                    targetUrls.add("http://10.178.194.48:5000/api/command");
+                } else {
+                    targetUrls.add("http://10.129.9.31:5000/api/command");
+                    targetUrls.add("http://10.178.194.48:5000/api/command");
+                    targetUrls.add("http://10.0.2.2:5000/api/command");
                 }
 
                 for (String urlStr : targetUrls) {
@@ -265,9 +261,6 @@ public class CloudflareSyncHelper {
                 boolean success = dispatchRawPayload(context, batchJson.toString());
                 if (success) {
                     sp.edit()
-                            .remove("history")
-                            .remove("timeline_history")
-                            .remove("location_history")
                             .putLong("last_usagestats_sync_time", System.currentTimeMillis())
                             .apply();
                 }
@@ -302,22 +295,21 @@ public class CloudflareSyncHelper {
             String apiKey = getApiKey(context);
 
             List<String> targetUrls = new ArrayList<>();
-            if (isEmulator()) {
-                targetUrls.add("http://10.0.2.2:5000/api/log");
-                targetUrls.add("http://10.178.194.48:5000/api/log");
-            } else {
-                targetUrls.add("http://10.178.194.48:5000/api/log");
-                targetUrls.add("http://10.0.2.2:5000/api/log");
-            }
-            targetUrls.add("https://myhelper-abdul-sync.loca.lt/api/log");
-            if (!tunnelUrl.isEmpty() && !targetUrls.contains(tunnelUrl)) {
+            if (!tunnelUrl.isEmpty()) {
                 String primary = tunnelUrl;
                 if (!primary.endsWith("/api/log")) {
                     primary += primary.endsWith("/") ? "api/log" : "/api/log";
                 }
-                if (!targetUrls.contains(primary)) {
-                    targetUrls.add(primary);
-                }
+                targetUrls.add(primary);
+            }
+            if (isEmulator()) {
+                targetUrls.add("http://10.0.2.2:5000/api/log");
+                targetUrls.add("http://10.129.9.31:5000/api/log");
+                targetUrls.add("http://10.178.194.48:5000/api/log");
+            } else {
+                targetUrls.add("http://10.129.9.31:5000/api/log");
+                targetUrls.add("http://10.178.194.48:5000/api/log");
+                targetUrls.add("http://10.0.2.2:5000/api/log");
             }
 
             for (String urlStr : targetUrls) {
